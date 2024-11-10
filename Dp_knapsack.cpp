@@ -208,3 +208,98 @@ int main() {
     solveNQ(n);
     return 0;
 }
+
+
+----------------------------------------------------Haffman coding-----------------------------------------------------------------------------------
+ #include<bits/stdc++.h>
+using namespace std;
+
+// A Huffman tree node
+
+
+
+struct Node {
+    char ch; // Character
+    int freq; // Frequency of the character
+    Node* left; // Left child
+    Node* right; // Right child
+
+    Node(char character, int frequency) {
+        ch = character;
+        freq = frequency;
+        left = right = nullptr;
+    }
+};
+
+// Comparator to order the priority queue (min-heap) based on frequency
+struct compare {
+    bool operator()(Node* left, Node* right) {
+        return left->freq > right->freq;
+    }
+};
+
+// Function to print Huffman codes from the root of Huffman Tree
+void printCodes(Node* root, string str, unordered_map<char, string>& huffmanCode) {
+    if (!root)
+        return;
+
+    // If the node is a leaf (contains a character), store the code
+    if (!root->left && !root->right)
+        huffmanCode[root->ch] = str;
+
+    printCodes(root->left, str + "0", huffmanCode);
+    printCodes(root->right, str + "1", huffmanCode);
+}
+
+// Function to implement Huffman Encoding
+void huffmanEncoding(const vector<char>& characters, const vector<int>& frequencies) {
+    // Priority queue to store the tree nodes (min-heap)
+    priority_queue<Node*, vector<Node*>, compare> pq;
+
+    // Create leaf nodes for each character and push into the priority queue
+    for (int i = 0; i < characters.size(); ++i) {
+        pq.push(new Node(characters[i], frequencies[i]));
+    }
+
+    // Iterate until there is only one node left in the priority queue
+    while (pq.size() != 1) {
+        // Extract the two nodes with the smallest frequencies
+        Node* left = pq.top();
+        pq.pop();
+        Node* right = pq.top();
+        pq.pop();
+
+        // Create a new internal node with frequency equal to the sum of the two nodes' frequencies
+        // The new node's character is a special marker (like '\0')
+        Node* newNode = new Node('\0', left->freq + right->freq);
+        newNode->left = left;
+        newNode->right = right;
+
+        // Push the new node back into the priority queue
+        pq.push(newNode);
+    }
+
+    // The root of the Huffman Tree is the only remaining node in the priority queue
+    Node* root = pq.top();
+
+    // Generate and print the Huffman codes by traversing the Huffman tree
+    unordered_map<char, string> huffmanCode;
+    printCodes(root, "", huffmanCode);
+
+    // Display the Huffman codes
+    cout << "Huffman Codes:\n";
+    for (auto& pair : huffmanCode) {
+        cout << pair.first << " : " << pair.second << "\n";
+    }
+}
+
+int main() {
+    // Input characters and their respective frequencies
+    vector<char> characters = { 'a', 'b', 'c', 'd', 'e', 'f' };
+    vector<int> frequencies = { 5, 9, 12, 13, 16, 45 };
+
+    // Perform Huffman encoding
+    huffmanEncoding(characters, frequencies);
+
+    return 0;
+}
